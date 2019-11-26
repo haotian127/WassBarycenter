@@ -1,4 +1,4 @@
-using Plots, Distributions
+using Plots, Interpolations
 
 N = 256;
 t = LinRange(0,1,N)
@@ -20,6 +20,8 @@ plot(t,[a b])
 ca = cumsum(a);
 cb = cumsum(b);
 # inverse cumulatives
+ica = quantile(ca);
+icb = quantile(cb);
 ica = interp1(ca, t, t, 'spline');
 icb = interp1(cb, t, t, 'spline');
 # composition of function
@@ -29,11 +31,17 @@ Tba = interp1(t, ica, cb, 'spline'); % ica o cb
 Iaa = interp1(t, Tba, Tab, 'spline'); % Tba o Tab
 Ibb = interp1(t, Tab, Tba, 'spline'); % Tab o Tba
 
-lw = 2;
-clf; hold on;
-plot(t, ca, 'r', 'LineWidth', lw);
-plot(t, cb, 'b', 'LineWidth', lw);
-axis tight; box on; SetTickOn();  SetAR(1);
-legend('C_{\mu}', 'C_{\nu}');
-set(gca, 'FontSize', 20);
-saveas(gca, [rep 'cumul.eps'], 'epsc');
+plot(t, [ca cb], legend = false, aspect_ratio = 1)
+
+plot([ica icb], legend = false)
+
+
+
+
+
+
+itp = interpolate(ica, BSpline(Cubic(Line(OnGrid()))))
+
+ica = [itp(1+4*k/256) for k in t]
+
+plot(t, ica)
